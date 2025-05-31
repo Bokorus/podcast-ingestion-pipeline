@@ -1,12 +1,10 @@
 CREATE TABLE IF NOT EXISTS transcript_segments (
-    episode_id INT AUTO_INCREMENT PRIMARY KEY,
-    rss_url TEXT,
-    feed_title VARCHAR(255),
-    episode_title VARCHAR(255),
-    audio_url TEXT,
-    published_at DATETIME,
-    description TEXT,
-    summary TEXT,
-    episode_link TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    segment_id INT AUTO_INCREMENT PRIMARY KEY,
+    episode_id INT,
+    whisper_segment_id INT,
+    segment_start FLOAT,
+    segment_end FLOAT,
+    segment_text TEXT,
+    FOREIGN KEY (episode_id) REFERENCES episodes(episode_id) ON DELETE CASCADE,
+    FULLTEXT (segment_text)
 );
