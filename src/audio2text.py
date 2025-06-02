@@ -1,8 +1,12 @@
 import os
 import requests
+import warnings
 import whisper
 from typing import Any, Dict, List, cast
 from urllib.parse import urlparse
+
+# ignore user warning regarding floats
+warnings.filterwarnings("ignore", message="FP16 is not supported on CPU; using FP32 instead")
 
 class Audio2Text:
     """
@@ -51,8 +55,10 @@ class Audio2Text:
         """
         r = requests.get(url, stream=True)
         with open(filename, 'wb') as f:
-            for chunk in r.iter_content(1024):
-                f.write(chunk)
+            for chunk in r.iter_content(chunk_size=65536):
+            #for chunk in r.iter_content(1024):
+                if chunk:
+                    f.write(chunk)
         return filename
 
 
@@ -65,7 +71,7 @@ class Audio2Text:
 
         Returns:
             List[Dict]: A list of dictionaries, each containing metadata for one utterance:
-                - segment_id (int): Segment identifier.
+                - whisper_segment_id (int): Whisper segment identifier.
                 - start (float): Start time of the utterance in seconds.
                 - end (float): End time of the utterance in seconds.
                 - text (str): Transcribed text of the utterance.
@@ -88,7 +94,7 @@ class Audio2Text:
             for seg in result.get("segments", []):  
                 seg = cast(Dict[str, Any], seg)
                 utterances.append({
-                    "segment_id": seg["id"],
+                    "whisper_segment_id": seg["id"],
                     "start": seg["start"],
                     "end": seg["end"],
                     "text": seg["text"].strip()

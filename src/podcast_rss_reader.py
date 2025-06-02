@@ -29,6 +29,7 @@ class PodcastRSSFeedReader:
 
         Returns:
             list: A list of dictionaries, each containing:
+                - rss_url (str): the url for the rss feed
                 - title (str): Title of the episode.
                 - audio_url (str): Direct URL to the episode's audio file.
                 - summary (str): Short summary of the episode.
@@ -39,20 +40,24 @@ class PodcastRSSFeedReader:
         """
         episodes = []
         for entry in self.feed.entries:
-            published_parsed = cast(time.struct_time, entry.published_parsed)
-            pub_year = published_parsed.tm_year # get year only for comparison
+            published_parsed = getattr(entry, "published_parsed", None)
+            pub_year = published_parsed.tm_year if published_parsed else None # get year only for comparison
 
             if filter_by_year is not None and pub_year != filter_by_year:
                 continue
 
+            audio_url = entry.enclosures[0].href if entry.enclosures else "unknown audio_url"
+            published = datetime(*published_parsed[:6]) if published_parsed else datetime(1900, 1, 1)
+
             episodes.append({
-                "title": entry.title,
-                "audio_url": entry.enclosures[0].href,
-                "summary": entry.summary,
-                "published": datetime(*published_parsed[:6]),
-                "description": entry.get("description", ""),
-                "episode_link": entry.link,
-                "feed_title": self.feed.feed.get("title", "unknown title") # type: ignore
+                "rss_url": self.rss_url,
+                "title": getattr(entry, "title", "unknown title"),
+                "audio_url": audio_url,
+                "summary": getattr(entry, "summary", "no summary"),
+                "published": published,
+                "description": getattr(entry, "description", "no description"),
+                "episode_link": getattr(entry, "link", "no episode link"),
+                "feed_title": self.feed.feed.get("title", "unknown title")  # type: ignore
             })
         return episodes
 
