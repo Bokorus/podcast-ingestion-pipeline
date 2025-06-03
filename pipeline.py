@@ -1,10 +1,15 @@
 from prefect import flow, task, get_run_logger
 from prefect.tasks import exponential_backoff
 import csv
+import logging
 from src.podcast_rss_reader import PodcastRSSFeedReader
 from src.audio2text import Audio2Text
 from src.sql.db_config import get_db_connection
 from src.sql.db_writer import insert_episode, insert_transcript_segments, episode_exists
+
+# Configure root logger
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 @task
 def read_rss_csv(path: str) -> list[str]:
@@ -116,6 +121,7 @@ def store_episode_data(episode: dict, transcript_segments: list[dict]):
         cursor.close()
         conn.close()
 
+
 @flow
 def audio_pipeline(csv_path: str = 'rss_feeds.csv'):
     """Main pipeline flow to process podcast RSS feeds.
@@ -123,7 +129,6 @@ def audio_pipeline(csv_path: str = 'rss_feeds.csv'):
     Args:
         csv_path (str): Path to the CSV file containing RSS feed URLs. Defaults to 'rss_feeds.csv'.
     """
-    logger = get_run_logger()
     logger.info("Starting audio_pipeline flow")
     rss_urls = read_rss_csv(csv_path)
 
