@@ -26,7 +26,6 @@ pip install -r requirements.txt
 
 ```bash
 .
-├── data/                  # Temporary audio files
 ├── src/
 │   ├── rss_reader.py      # Parses RSS feeds & downloads episodes
 │   ├── audio2text.py      # Downloads & transcribes audio
