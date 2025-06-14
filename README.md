@@ -27,15 +27,19 @@ pip install -r requirements.txt
 ```bash
 .
 ├── src/
-│   ├── rss_reader.py      # Parses RSS feeds & downloads episodes
-│   ├── audio2text.py      # Downloads & transcribes audio
-│   ├── db_writer.py       # Inserts metadata & segments into MySQL
-│   └── pipeline.py        # Orchestrates tasks via Prefect
+│   ├── rss_reader.py        # Parses RSS feeds & downloads episodes
+│   ├── audio2text.py        # Downloads & transcribes audio
+│   ├── pipeline.py          # Orchestrates tasks via Prefect
 ├── sql/
-│   ├── create_tables.sql  # Schema for `episodes` and `transcript_segments`
-│   └── election_query.sql # Election-related SQL query
-├── .env                   # Environment variables (MySQL credentials)
-├── rss_feeds.csv          # Provided RSS feed list
+│   ├── db_config.py         # Database connection config
+│   ├── db_writer.py         # Inserts metadata & segments into MySQL
+│   ├── create_db_tables.py  # Creates database tables
+│   └── queries/
+│       ├── create_episodes_table.sql
+│       ├── create_transcript_segments_table.sql
+│       └── presidential-candidate-query.sql
+├── .env                     # Environment variables (MySQL credentials)
+├── rss_feeds.csv            # RSS feed list for ingestion
 └── README.md
 ```
 
@@ -50,7 +54,7 @@ cp .env.template .env
 Edit it to match your database connection:
 
 ```dotenv
-DB_HOST=your-db-host.rds.amazonaws.com
+DB_HOST=<your-rds-endpoint>
 DB_PORT=3306
 DB_USER=your_user
 DB_PASSWORD=your_password
